@@ -1,0 +1,1155 @@
+09.08 6:25 AM
+You are a senior cross-platform software architect, Flutter engineer, Android systems engineer, Windows application engineer, product designer, database architect, security engineer, and QA engineer.
+Your task is to DESIGN AND BUILD a production-quality personal productivity application named:
+FOCUS
+============================================================
+1. PRODUCT VISION
+============================================================
+Focus is a private, local-first, cross-platform personal productivity and digital-discipline application for:
+1. Android
+2. Windows
+The application exists because the user currently spends too much time on their phone throughout the day, starting soon after waking and continuing until going to sleep.
+Focus should not merely display screen-time statistics.
+It should actively help the user:
+- control when the phone can be used;
+- reduce unnecessary smartphone usage;
+- enforce healthy digital boundaries;
+- manage tasks and projects;
+- plan each day;
+- enter distraction-free focus sessions;
+- capture notes and ideas;
+- track goals and habits;
+- understand behavioral patterns;
+- analyze phone usage;
+- measure productivity;
+- correlate digital behavior with productivity;
+- produce actionable daily/weekly/monthly reports;
+- synchronize useful productivity information between Android and Windows.
+The product philosophy is:
+"Control the environment. Protect attention. Understand behavior. Focus on what matters."
+Focus should feel like a premium personal productivity operating layer rather than a generic to-do application.
+============================================================
+2. CRITICAL PRODUCT PRINCIPLES
+============================================================
+Follow these principles throughout the implementation.
+1. LOCAL-FIRST
+Personal behavioral data should primarily remain on the user's devices.
+Do not require cloud connectivity for basic functionality.
+Tasks, notes, projects, habits, usage history, Focus sessions and analytics should remain functional offline.
+2. PRIVACY-FIRST
+Phone usage data is sensitive.
+Do not unnecessarily transmit raw behavioral information to third-party services.
+Design the architecture so AI functionality can later receive aggregated/sanitized information instead of unrestricted raw data.
+3. PRODUCTIVITY WITHOUT AI
+The core application MUST work without an LLM.
+AI is an optional intelligence layer, not the foundation of the application.
+4. CROSS-PLATFORM
+Use Flutter as the primary application framework unless an unavoidable technical requirement requires platform-specific implementation.
+Target:
+- Android
+- Windows
+Use native Android Kotlin code/platform channels where Flutter alone cannot provide required operating-system capabilities.
+5. MODULAR ARCHITECTURE
+Do not create one giant application.
+Use clearly separated domains/modules.
+6. SAFETY
+Never make emergency communication inaccessible.
+Night Lock must always provide a safe emergency escape mechanism.
+7. NO FAKE CAPABILITIES
+Do not claim Android APIs can perform operations that Android does not permit.
+If a capability requires:
+- Usage Access
+- Accessibility Service
+- Notification Listener
+- Device Owner
+- foreground service
+- overlay permission
+- battery optimization exemption
+- native Android APIs
+implement the correct permission architecture and clearly document the limitation.
+Do NOT pretend a normal Android application can physically shut the device down and automatically boot it later.
+============================================================
+3. PRIMARY FEATURE — NIGHT LOCK
+============================================================
+Night Lock is one of the defining features of Focus.
+DEFAULT SCHEDULE:
+Phone available:
+07:00 AM → 09:00 PM
+Night Lock:
+09:00 PM → 07:00 AM
+The schedule must eventually be configurable.
+At 09:00 PM, Focus automatically enters Night Lock.
+At 07:00 AM, Focus automatically exits Night Lock.
+Night Lock does NOT mean physically powering the phone off.
+It means creating the strongest reliable software-level restricted-device experience that can reasonably be implemented on Android.
+============================================================
+4. NIGHT LOCK EXPERIENCE
+============================================================
+Before activation:
+20 minutes before Night Lock:
+show a subtle warning.
+10 minutes before:
+show another warning.
+5 minutes before:
+show a prominent countdown.
+Example:
+"NIGHT LOCK IN 5 MINUTES"
+"Finish what you're doing. Your digital day ends at 9:00 PM."
+At 9 PM:
+display a dedicated Night Lock interface.
+Example:
+--------------------------------
+          DAY COMPLETE
+      NIGHT LOCK ACTIVE
+       9:00 PM → 7:00 AM
+       Unlocks in:
+          09:43:21
+--------------------------------
+Emergency
+Alarm
+Allowed Apps
+--------------------------------
+The countdown should update correctly.
+The interface should be visually calm, dark and intentionally minimal.
+============================================================
+5. NIGHT LOCK WHITELIST
+============================================================
+Night Lock must support essential applications.
+Examples:
+- Phone
+- Emergency contacts
+- Alarm / Clock
+- authenticator applications
+- optionally Maps
+- user-defined emergency applications
+The whitelist should be configurable.
+Do NOT allow unrestricted application access simply because an application is categorized incorrectly.
+============================================================
+6. NIGHT LOCK OVERRIDE
+============================================================
+Night Lock must never create a dangerous situation.
+Implement an emergency/necessary-access override.
+However, avoid a simple "Unlock" button.
+Introduce intentional friction.
+Possible flow:
+Hold button for 10 seconds
+→
+Display:
+"Why do you need access?"
+Options:
+- Emergency
+- Important communication
+- Work / Study
+- Travel
+- Other
+→
+Require explicit confirmation.
+→
+Grant temporary access.
+Default temporary unlock:
+15 minutes.
+Then automatically return to Night Lock.
+Store:
+- timestamp;
+- reason;
+- duration;
+- applications used during override where legally/technically available;
+- whether override ended normally.
+Night Lock analytics should include override frequency.
+============================================================
+7. NIGHT LOCK STREAKS
+============================================================
+Track:
+- successful Night Lock nights;
+- interrupted nights;
+- override count;
+- current streak;
+- longest streak;
+- percentage compliance;
+- average Night Lock start;
+- late activation;
+- manual disabling attempts if technically observable.
+Do not design streaks to shame the user.
+Use them as behavioral feedback.
+============================================================
+8. DAYTIME DIGITAL CONTROL
+============================================================
+The 7 AM → 9 PM period should NOT mean unlimited smartphone usage.
+Create a Digital Discipline module.
+Support:
+- application usage monitoring;
+- application limits;
+- category limits;
+- daily usage budgets;
+- temporary blocking;
+- focus-based blocking;
+- distraction application list;
+- usage warnings;
+- cooldown periods;
+- configurable limits.
+Example:
+Instagram:
+30 minutes/day
+YouTube:
+45 minutes/day
+Entertainment:
+60 minutes/day
+Social:
+45 minutes/day
+When approaching limits:
+80%:
+gentle warning.
+100%:
+block/restrict according to configured policy.
+Design the underlying system so these rules can evolve later.
+============================================================
+9. APPLICATION USAGE TRACKING
+============================================================
+On Android, investigate and correctly implement the legitimate Android mechanisms needed to obtain usage information.
+Potential mechanisms include Android UsageStatsManager and Usage Access permission.
+Track only what is technically obtainable.
+Potential metrics:
+- total screen/device usage;
+- application usage duration;
+- foreground application sessions;
+- application launches;
+- usage by category;
+- longest continuous usage session;
+- first significant phone usage;
+- last significant phone usage;
+- hourly usage distribution;
+- daily usage distribution;
+- usage during Focus sessions;
+- Night Lock overrides.
+If a metric cannot reliably be obtained on a particular Android version, document it instead of fabricating data.
+============================================================
+10. PRODUCTIVITY HOME — TODAY
+============================================================
+The central application screen should be:
+TODAY
+This should answer:
+"What should I do today?"
+Example:
+------------------------------------------------
+Good Morning
+Tuesday, September 8
+TODAY
+3 Priority Tasks
+2 Events
+4h Focus Target
+08:00   Study
+10:30   Project Development
+14:00   Assignment
+PHONE BUDGET
+Used: 43m
+Budget: 3h 30m
+Social
+12m / 45m
+Entertainment
+17m / 60m
+FOCUS
+Today:
+1h 24m / 4h
+[ START FOCUS ]
+[ + CAPTURE ]
+------------------------------------------------
+Do not overcrowd this interface.
+Important information must be immediately visible.
+============================================================
+11. TASK MANAGEMENT
+============================================================
+Implement a serious but lightweight task-management system.
+Task properties should support:
+- id;
+- title;
+- description;
+- status;
+- priority;
+- project;
+- tags;
+- due date;
+- due time;
+- estimated duration;
+- actual focus duration;
+- recurrence;
+- creation timestamp;
+- completion timestamp;
+- optional notes.
+Statuses:
+- Inbox
+- Planned
+- In Progress
+- Completed
+- Cancelled
+Priorities:
+- Low
+- Medium
+- High
+- Critical
+Support recurring tasks.
+============================================================
+12. INBOX / QUICK CAPTURE
+============================================================
+Focus must make capturing information extremely fast.
+Provide:
++ Capture
+The user should be able to quickly create:
+- Task
+- Note
+- Reminder
+- Idea
+Future architecture should allow natural-language capture.
+Example:
+"Finish architecture diagram tomorrow at 10"
+Future parsing could identify:
+Task:
+Finish architecture diagram
+Due:
+Tomorrow, 10:00 AM
+Do NOT require AI for basic capture.
+============================================================
+13. PROJECT MANAGEMENT
+============================================================
+Tasks can belong to Projects.
+A project should support:
+- title;
+- description;
+- status;
+- deadline;
+- progress;
+- priority;
+- tasks;
+- notes;
+- milestones;
+- creation date;
+- completion date.
+Project states:
+- Planning
+- Active
+- Paused
+- Completed
+- Archived
+Project progress should primarily derive from task/milestone completion rather than arbitrary numbers.
+============================================================
+14. CALENDAR
+============================================================
+Create an integrated productivity calendar.
+Display:
+- task deadlines;
+- scheduled tasks;
+- reminders;
+- project milestones;
+- Focus sessions;
+- recurring events.
+Views:
+- Day
+- Week
+- Month
+Architecture should allow future integration with external calendars.
+Do not make external calendar services mandatory for V1.
+============================================================
+15. FOCUS MODE
+============================================================
+Implement Focus Sessions.
+The user selects:
+Task/Project
+Duration
+Example:
+50 minute focus
+10 minute break
+During a Focus session:
+- show timer;
+- show current task;
+- suppress unnecessary application interaction where permitted;
+- optionally block selected distracting applications;
+- track session duration;
+- detect interruptions where technically possible;
+- record completion.
+Support:
+- Pomodoro;
+- custom timers;
+- open-ended Deep Work.
+Metrics:
+- planned duration;
+- actual duration;
+- interruptions;
+- completion;
+- linked task;
+- linked project.
+============================================================
+16. NOTES
+============================================================
+Implement lightweight notes.
+Support:
+- title;
+- body;
+- created date;
+- modified date;
+- tags;
+- project association;
+- task association;
+- pinned notes.
+Markdown-style text support is desirable.
+Keep the notes system fast.
+Do not attempt to recreate a full Notion-like editor in V1.
+============================================================
+17. GOALS
+============================================================
+Support goals such as:
+"Reduce average phone usage below 3 hours."
+"Study 20 hours this week."
+"Complete Project X."
+"Maintain Night Lock for 14 days."
+Goals should support:
+- title;
+- target;
+- unit;
+- start date;
+- target date;
+- current progress;
+- status;
+- associated tasks/projects/metrics.
+============================================================
+18. HABITS
+============================================================
+Implement basic habit tracking.
+Examples:
+Read
+Exercise
+Study
+Meditate
+Sleep on time
+Track:
+- daily completion;
+- streak;
+- longest streak;
+- completion rate.
+Avoid excessive gamification.
+============================================================
+19. ANALYTICS ENGINE
+============================================================
+Analytics is another defining capability of Focus.
+Do NOT simply recreate Android Digital Wellbeing.
+The objective is to combine:
+DEVICE BEHAVIOR
++
+PRODUCTIVITY BEHAVIOR
++
+DIGITAL DISCIPLINE
+and produce useful insights.
+============================================================
+20. ANALYTICS — PHONE USAGE
+============================================================
+Provide analytics for:
+- total screen/device usage;
+- average daily usage;
+- usage change;
+- usage by application;
+- usage by category;
+- hourly usage;
+- peak usage period;
+- longest session;
+- application launch frequency where available;
+- morning usage;
+- evening usage;
+- Night Lock usage;
+- override usage.
+Create:
+Daily Report
+Weekly Report
+Monthly Report
+============================================================
+21. ANALYTICS — PRODUCTIVITY
+============================================================
+Measure:
+- tasks created;
+- tasks completed;
+- completion rate;
+- overdue tasks;
+- Focus hours;
+- Focus sessions;
+- average Focus session;
+- projects progressed;
+- habits completed;
+- goal progress;
+- most productive hours;
+- most productive days.
+============================================================
+22. ANALYTICS — DIGITAL DISCIPLINE
+============================================================
+Measure:
+- Night Lock compliance;
+- current Night Lock streak;
+- longest streak;
+- overrides;
+- app limit violations;
+- distraction time;
+- Focus interruptions;
+- daily phone budget adherence.
+============================================================
+23. PRODUCTIVITY SCORE
+============================================================
+Design an explainable Productivity Score.
+Possible components:
+- task completion;
+- Focus time;
+- distraction control;
+- Night Lock compliance;
+- goal progress.
+Do NOT create an arbitrary opaque score.
+Store the component values so the UI can explain:
+"Your score increased because Focus time increased and distraction usage decreased."
+Make weights configurable internally.
+============================================================
+24. DIGITAL WELLBEING SCORE
+============================================================
+Create a separate Digital Discipline / Wellbeing score.
+Potential factors:
+- total usage vs target;
+- social/entertainment usage;
+- Night Lock compliance;
+- override count;
+- excessive continuous sessions;
+- Focus interruptions.
+Again:
+make the calculation transparent.
+============================================================
+25. BEHAVIORAL INSIGHTS
+============================================================
+Create an Insight Engine.
+Start with deterministic statistical/rule-based analysis.
+AI is optional later.
+Examples:
+"Your phone usage decreased 17% compared with last week."
+"Your highest usage occurs between 8 PM and 9 PM."
+"You complete more tasks on days where social-media usage stays below 45 minutes."
+"Your strongest Focus period appears to be 9–11 AM."
+"Night Lock was successfully maintained for six of the last seven nights."
+IMPORTANT:
+Do NOT confuse correlation with causation.
+Use wording such as:
+"On days where X occurred, Y was also higher."
+Do not claim:
+"X caused Y"
+unless actual causal evidence exists.
+============================================================
+26. REPORTING
+============================================================
+Daily report should summarize:
+- phone usage;
+- most-used applications;
+- Focus time;
+- tasks;
+- Night Lock;
+- goals;
+- notable behavior.
+Weekly report should include:
+- this week vs previous week;
+- usage trends;
+- productivity trends;
+- Focus trends;
+- Night Lock trends;
+- strongest/weakest periods;
+- notable correlations;
+- recommendations.
+Monthly report:
+- longer-term trends;
+- average screen time;
+- productivity;
+- projects;
+- goals;
+- digital-discipline improvement;
+- Night Lock adherence;
+- major behavioral patterns.
+============================================================
+27. ANALYTICS UI
+============================================================
+Create premium interactive charts.
+Possible visualizations:
+- screen-time line chart;
+- weekly bars;
+- app distribution;
+- hourly heatmap;
+- Focus-time chart;
+- task completion;
+- Night Lock calendar;
+- streak visualization;
+- productivity trend;
+- distraction trend.
+Charts must be readable and useful.
+Avoid decorative charts that convey no actionable information.
+============================================================
+28. WINDOWS APPLICATION
+============================================================
+The Windows version should be more than a stretched Android UI.
+Optimize the layout for desktop.
+Primary navigation:
+Today
+Inbox
+Tasks
+Projects
+Calendar
+Focus
+Notes
+Goals
+Analytics
+Settings
+Use a left navigation sidebar.
+Windows should become the main planning and analytics environment.
+Example:
+┌──────────────┬──────────────────────────────────────┐
+│ FOCUS        │ TODAY                                │
+│              │                                      │
+│ Today        │ Priority Tasks                       │
+│ Inbox        │                                      │
+│ Tasks        │ Focus Progress                       │
+│ Projects     │                                      │
+│ Calendar     │ Phone Usage                          │
+│ Focus        │                                      │
+│ Notes        │ Upcoming                             │
+│ Goals        │                                      │
+│ Analytics    │                                      │
+│              │                                      │
+│ Settings     │                                      │
+└──────────────┴──────────────────────────────────────┘
+============================================================
+29. WINDOWS PHONE STATUS
+============================================================
+When synchronization is available, Windows should display Android status.
+Example:
+PHONE
+Night Lock:
+ACTIVE
+Locked until:
+07:00
+Tonight:
+0 overrides
+Current streak:
+6 nights
+Today's usage:
+2h 14m
+This allows the user to understand phone behavior without picking up the phone.
+============================================================
+30. ANDROID NAVIGATION
+============================================================
+Use mobile-appropriate navigation.
+Potential bottom navigation:
+Today
+Tasks
+Focus
+Analytics
+Additional features through:
+More / menu.
+Keep quick capture accessible globally.
+============================================================
+31. DESIGN LANGUAGE
+============================================================
+Focus must look PREMIUM.
+Avoid:
+- generic Bootstrap-like cards;
+- excessive rounded rectangles;
+- excessive gradients;
+- childish gamification;
+- clutter;
+- unnecessary animations;
+- old-fashioned dashboard design.
+Aim for:
+minimal
+calm
+focused
+modern
+high-end
+information-dense when appropriate
+excellent typography
+strong hierarchy
+smooth transitions
+Use a restrained visual system.
+Support:
+Dark Mode
+Light Mode
+System Theme
+Night Lock should use a special minimal dark interface.
+Animations should be subtle and purposeful.
+============================================================
+32. DATABASE
+============================================================
+Use SQLite locally.
+Create a proper repository/data-access layer.
+Do not place SQL directly throughout UI code.
+Potential entities:
+UserPreferences
+Task
+Project
+ProjectMilestone
+Note
+Goal
+Habit
+HabitEntry
+FocusSession
+AppUsageRecord
+UsageSession
+DailyUsageSummary
+NightLockSession
+NightLockOverride
+AppLimit
+AppWhitelistEntry
+DailyProductivitySummary
+Insight
+Reminder
+SyncRecord
+Design indexes appropriately.
+Use migrations.
+============================================================
+33. DATA AGGREGATION
+============================================================
+Do not repeatedly calculate years of analytics from raw usage events.
+Maintain aggregation levels.
+For example:
+Raw usage sessions
+        ↓
+Daily summaries
+        ↓
+Weekly analytics
+        ↓
+Monthly analytics
+Keep enough raw information for useful analysis while avoiding unnecessary storage growth.
+============================================================
+34. SYNC ARCHITECTURE
+============================================================
+The application must eventually synchronize between Android and Windows.
+However:
+DO NOT tightly couple the application to a cloud provider.
+Define a Sync abstraction.
+Example:
+SyncProvider
+Implementations could eventually include:
+LocalNetworkSync
+EncryptedCloudSync
+SelfHostedSync
+For initial development, local SQLite should remain the source of truth.
+Implement sync only after the core local application is stable.
+Plan for:
+- UUID identifiers;
+- timestamps;
+- updated_at;
+- deleted/tombstone state;
+- conflict resolution;
+- schema versioning.
+============================================================
+35. SECURITY
+============================================================
+Treat behavioral information as sensitive.
+Implement:
+- secure settings storage;
+- no secrets hardcoded;
+- no API keys committed;
+- minimal permissions;
+- clear permission explanations;
+- sanitized logs;
+- no behavioral information in crash logs;
+- no unnecessary telemetry.
+If encryption-at-rest is feasible without destabilizing the initial implementation, design for it.
+============================================================
+36. ANDROID PERMISSIONS
+============================================================
+Create a dedicated onboarding/permission flow.
+Explain WHY each permission is required.
+Potential capabilities may require:
+Usage Access
+Notification Access
+Accessibility
+Overlay
+Foreground services
+Exact alarms/scheduling
+Battery optimization settings
+Only request permissions actually required by implemented functionality.
+Never silently abuse Accessibility APIs.
+Clearly separate:
+REQUIRED
+from
+OPTIONAL
+permissions.
+============================================================
+37. ANDROID VERSION COMPATIBILITY
+============================================================
+Account for modern Android restrictions.
+Do not implement functionality assuming old unrestricted background-service behavior.
+Design around:
+- foreground service restrictions;
+- background execution limits;
+- Doze;
+- exact alarm restrictions;
+- notification permission;
+- package visibility;
+- usage-access requirements.
+Document minimum Android version and feature degradation.
+============================================================
+38. SCHEDULING
+============================================================
+Night Lock scheduling must survive:
+- application restart;
+- phone reboot;
+- timezone changes;
+- daylight-saving changes where applicable;
+- application process termination.
+Do not rely solely on an in-memory Dart Timer.
+Use appropriate Android scheduling mechanisms.
+Reconstruct state after startup.
+If current time is within Night Lock:
+immediately restore Night Lock state.
+============================================================
+39. STATE MACHINE
+============================================================
+Night Lock should use an explicit state machine.
+Potential states:
+DAY_ACTIVE
+PRE_LOCK_WARNING
+NIGHT_LOCK_ACTIVE
+TEMPORARY_OVERRIDE
+EMERGENCY_ACCESS
+DISABLED
+Transitions must be deterministic.
+Persist important state.
+Avoid scattered boolean variables such as:
+isLocked
+isOverride
+isNight
+isEnabled
+that can become inconsistent.
+============================================================
+40. FAILURE MODES
+============================================================
+Handle:
+- device reboot;
+- permission revoked;
+- application killed;
+- database unavailable;
+- schedule changed;
+- timezone changed;
+- corrupted preference;
+- failed background execution;
+- usage-access unavailable;
+- Windows sync unavailable.
+The app should degrade safely.
+============================================================
+41. NOTIFICATIONS
+============================================================
+Notifications should be useful rather than distracting.
+Examples:
+"Night Lock begins in 10 minutes."
+"You've used 80% of today's social-media budget."
+"Focus session completed."
+"Your phone usage is 22% lower than this time yesterday."
+Allow categories to be disabled.
+============================================================
+42. SEARCH
+============================================================
+Implement global search across:
+- tasks;
+- projects;
+- notes;
+- goals.
+Future architecture can support command-palette functionality.
+Windows shortcut could eventually open global capture/search.
+============================================================
+43. SETTINGS
+============================================================
+Organize settings into:
+General
+Appearance
+Night Lock
+Digital Discipline
+Focus
+Notifications
+Analytics
+Privacy
+Sync
+Data
+About
+Night Lock settings:
+Enabled
+Start
+End
+Whitelist
+Override duration
+Warnings
+Emergency settings
+============================================================
+44. DATA EXPORT
+============================================================
+The user owns their data.
+Design export support for:
+JSON
+CSV
+Potential future report export:
+PDF.
+Also plan for local backup and restore.
+============================================================
+45. OPTIONAL AI LAYER — FUTURE
+============================================================
+Do NOT make AI mandatory for V1.
+Create architecture allowing a future AI Assistant.
+Potential capabilities:
+"Plan my day."
+"What should I work on?"
+"Why was I less productive this week?"
+"Summarize my week."
+"Break this project into tasks."
+"How is my phone usage changing?"
+AI should receive structured analytics rather than unrestricted database access whenever possible.
+Any AI-generated action that modifies important data should require confirmation.
+============================================================
+46. TESTING
+============================================================
+Create tests from the beginning.
+Unit tests:
+- Night Lock scheduling;
+- Night Lock state transitions;
+- usage aggregation;
+- productivity-score calculation;
+- discipline-score calculation;
+- task recurrence;
+- project progress;
+- streak calculation;
+- insight rules.
+Integration tests:
+- database repositories;
+- analytics pipeline;
+- settings persistence;
+- Night Lock restoration.
+UI tests for critical workflows.
+Do not sacrifice architecture simply to make a demo work.
+============================================================
+47. LOGGING
+============================================================
+Implement structured application logging.
+Levels:
+DEBUG
+INFO
+WARNING
+ERROR
+Never log:
+private note contents;
+sensitive usage history unnecessarily;
+authentication secrets;
+API keys.
+============================================================
+48. PROJECT STRUCTURE
+============================================================
+Use a feature-oriented modular Flutter structure.
+Example:
+lib/
+  app/
+  core/
+    database/
+    logging/
+    security/
+    scheduling/
+    platform/
+    sync/
+    utilities/
+  features/
+    onboarding/
+    today/
+    inbox/
+    tasks/
+    projects/
+    calendar/
+    focus/
+    notes/
+    goals/
+    habits/
+    night_lock/
+    digital_discipline/
+    analytics/
+    insights/
+    search/
+    settings/
+Android native code:
+android/
+  Kotlin platform integrations
+Keep domain logic independent from Flutter widgets wherever practical.
+============================================================
+49. ARCHITECTURAL LAYERS
+============================================================
+Use separation similar to:
+Presentation
+    ↓
+Application
+    ↓
+Domain
+    ↓
+Repository Interfaces
+    ↓
+Infrastructure
+    ↓
+SQLite / Android APIs / Sync
+UI must NOT directly query Android UsageStatsManager or SQLite.
+Use interfaces.
+Example:
+UsageRepository
+NightLockRepository
+TaskRepository
+AnalyticsRepository
+============================================================
+50. DEVELOPMENT PHASES
+============================================================
+Do NOT attempt every feature simultaneously.
+PHASE 0 — FOUNDATION
+- Flutter project
+- Windows + Android targets
+- architecture
+- navigation
+- theme
+- SQLite
+- logging
+- settings
+- test infrastructure
+PHASE 1 — PRODUCTIVITY CORE
+- Today
+- Inbox
+- Tasks
+- Projects
+- Notes
+- quick capture
+- basic calendar
+PHASE 2 — FOCUS ENGINE
+- Focus timer
+- sessions
+- task association
+- Focus history
+- distraction configuration
+PHASE 3 — NIGHT LOCK
+- schedule
+- state machine
+- warnings
+- Android native integration
+- whitelist
+- temporary override
+- persistence
+- reboot recovery
+- permission handling
+This phase requires particularly strong testing.
+PHASE 4 — DEVICE USAGE
+- UsageStats integration
+- usage sessions
+- app statistics
+- categories
+- daily budgets
+- limits
+PHASE 5 — ANALYTICS
+- daily aggregation
+- weekly aggregation
+- monthly aggregation
+- charts
+- comparisons
+- productivity metrics
+- discipline metrics
+PHASE 6 — INSIGHT ENGINE
+- deterministic behavioral insights
+- correlations
+- trend detection
+- recommendations
+PHASE 7 — GOALS + HABITS
+- goals
+- habits
+- streaks
+- analytics integration
+PHASE 8 — WINDOWS EXPERIENCE
+- desktop-optimized layouts
+- analytics dashboard
+- keyboard shortcuts
+- improved capture
+- phone-status dashboard
+PHASE 9 — CROSS-DEVICE SYNC
+Only after local behavior is stable.
+PHASE 10 — HARDENING
+- security audit
+- permission audit
+- battery testing
+- Android lifecycle testing
+- performance profiling
+- database migration testing
+- recovery testing
+- accessibility
+- UX polish
+PHASE 11 — OPTIONAL INTELLIGENCE
+- AI abstraction
+- natural-language capture
+- planning assistant
+- report summarization
+- structured recommendations
+============================================================
+51. FIRST-RUN EXPERIENCE
+============================================================
+Create premium onboarding.
+Screen 1:
+FOCUS
+"Take back control of your attention."
+Screen 2:
+Explain Productivity.
+Screen 3:
+Explain Digital Discipline.
+Screen 4:
+Explain Night Lock.
+Default:
+07:00 → 21:00
+Screen 5:
+Configure essential applications.
+Screen 6:
+Explain usage permissions.
+Screen 7:
+Set initial goals.
+Examples:
+Daily phone target
+Daily Focus target
+Night Lock schedule
+Finish:
+"Your system is ready."
+============================================================
+52. HOME SCREEN INFORMATION HIERARCHY
+============================================================
+Priority order:
+1. What must I do now?
+2. What must I do today?
+3. How much Focus work have I completed?
+4. How much phone budget remains?
+5. What is coming next?
+6. Are there meaningful behavioral warnings?
+Do NOT turn the home page into an analytics dashboard.
+Analytics belongs primarily in Analytics.
+============================================================
+53. PERFORMANCE
+============================================================
+Focus must remain lightweight.
+Optimize:
+- database queries;
+- chart rendering;
+- background processing;
+- battery usage;
+- usage aggregation;
+- application startup.
+Do not continuously poll Android APIs if event/scheduled approaches are available.
+============================================================
+54. ACCESSIBILITY
+============================================================
+Support:
+- scalable text;
+- screen readers where practical;
+- sufficient contrast;
+- large touch targets;
+- keyboard navigation on Windows.
+Do not rely exclusively on color to represent state.
+============================================================
+55. BRAND
+============================================================
+Application name:
+Focus
+The visual identity should communicate:
+attention
+calm
+control
+clarity
+discipline
+progress
+
