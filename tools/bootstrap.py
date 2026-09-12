@@ -10,7 +10,12 @@ args=parser.parse_args()
 flutter=shutil.which('flutter')
 if not flutter: raise SystemExit('Install Flutter and add flutter/bin to PATH, then run this script again.')
 if (root/'android').exists() or (root/'windows').exists():
-    if not args.refresh_runners: raise SystemExit('Runners already exist. Run flutter pub get, or back up custom runner changes before --refresh-runners.')
+    if not args.refresh_runners:
+        if not ((root/'android').exists() and (root/'windows').exists()):
+            raise SystemExit('Only one runner exists; back up runner edits before --refresh-runners.')
+        shutil.copytree(root/'native'/'android',root/'android',dirs_exist_ok=True)
+        subprocess.run([flutter,'pub','get'],cwd=root,check=True)
+        raise SystemExit(0)
 with tempfile.TemporaryDirectory(prefix='focus-runners-') as tmp:
     stage=pathlib.Path(tmp)/'focus'
     subprocess.run([flutter,'create','--project-name','focus','--org','com.personal',

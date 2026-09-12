@@ -12,11 +12,11 @@ Flutter owns the productivity workspace: presentation, user intents and SQLite r
 | Persistence | `core/database` | SQLite versioning, record repository, usage-day upserts, transactional merge/export |
 | Platform | `core/platform/device_bridge.dart` | Explicit Android capability API; unsupported response on Windows |
 | Native runtime | `native/android/...` | Kotlin integration and Java scheduling/usage policies |
-| Future sync | `core/sync` | Provider and batch boundaries; no transport implementation |
+| Local sync | `core/sync` | Explicit AES-GCM authenticated snapshot exchange with temporary pairing |
 
 Widgets invoke controller/repository operations rather than embedding SQL or querying Android APIs. The initial controller currently uses the concrete local repository for settings/export; more complete repository interfaces should be introduced as those domains stabilize. Pure domain calculations do not depend on Flutter widgets.
 
-## Local database v1
+## Local database v2
 
 `records` stores a UUID, feature kind, title/body, state, priority, project reference, due UTC timestamp, created/updated UTC timestamps, tombstone and a feature-owned JSON payload. Indexed columns cover kind/state, due time, project and update cursors. Feature payloads cover tags, recurrence, session timing, goal progress and habit civil dates.
 
@@ -26,13 +26,13 @@ SQLite enables foreign-key enforcement and WAL. V1 has no actual foreign-key ref
 
 Task completion rereads the current task inside a transaction, marks it complete and inserts the next occurrence exactly once. Monthly recurrence clamps to the following month's final day. It advances from the most recent due date; end-of-month anchor preservation is future work. A large overdue backlog is not silently marked complete.
 
-JSON exports include all records (including tombstones), preferences, usage and the available native Night Lock status/override snapshot. CSV exports include visible record metadata and neutralize leading spreadsheet formula characters. The current JSON import merges **records only**, comparing update timestamps transactionally. It neither restores native permissions nor enables restriction. Full-fidelity backup restoration is not implemented.
+JSON exports include records (including tombstones), preferences, usage, note versions and the available native Night Lock snapshot. CSV neutralizes leading spreadsheet formula characters. JSON restore merges records, usage and note versions transactionally and restores theme/daily targets. It does not grant permissions or restore restriction configuration. The v1-to-v2 migration adds record_versions; overwritten notes and ideas retain up to twenty revisions.
 
 ## Session accounting
 
 An active session is a persisted record with UTC start and optional target end. UI timers derive remaining time from timestamps. On restart, an expired fixed-duration session is completed at its planned endpoint, not the later restart time. Open-ended time continues until explicitly ended; unattended gaps are a known limitation and must not be interpreted as observed attention.
 
-Completed/interrupted intervals are clipped to each report window. A session crossing midnight contributes only its overlapping seconds to each day. Active records are excluded from report totals until closed. No pause/break state is implied.
+Completed/interrupted intervals are clipped to each report window. A session crossing midnight contributes only overlapping seconds to each day. Active records and explicit break sessions are excluded from focus totals. Android completion/reminder alarms are persisted natively and rescheduled after boot; Windows currently shows completion only while the application is open.
 
 ## Native Night Lock
 
@@ -48,12 +48,12 @@ The overlay ordinary override flow is hold → reason → confirm. Emergency esc
 
 ## Usage and analytics quality
 
-A user-requested import queries Android UsageEvents with a one-day lookback to reconstruct foreground state across midnight. The pure accumulator clips intervals, ignores duplicate resume events and unrelated pauses, closes on screen-off/keyguard/shutdown, and aggregates by package. This is an exclusive foreground approximation. Missing/truncated events, OEM differences, multi-window and long-running sessions can affect accuracy. No-data days stay unavailable; the importer does not invent zeros.
+Usage imports run on opening/resuming Android when permission is available, or by user request, with a one-day lookback to reconstruct foreground state across midnight. The accumulator clips intervals, ignores duplicate resume events and unrelated pauses, closes on screen-off/keyguard/shutdown, and aggregates by package. Missing/truncated events, OEM differences, multi-window and long-running sessions affect accuracy. No-data days remain unknown. Daytime budget enforcement reads usage on foreground changes and schedules the next warning/budget boundary.
 
-The initial productivity score uses planned-task completion (50%) and focus target attainment (50%). The discipline score uses observed phone budget adherence (60%) and observed Night Lock compliance (40%, currently unavailable). Values are clipped to 0–1, available weights are renormalized, and component coverage is displayed. Over-budget adherence is budget/usage; under-budget adherence is 1. Scores are descriptive target tracking, not medical wellbeing assessment.
+Productivity scores use planned-task completion (50%) and focus target attainment (50%). Discipline scores use observed phone budget adherence (60%) and fully observed Night Lock compliance (40%). Values are clipped to 0–1, available weights renormalized, and coverage displayed. Observation gaps remain unknown. Reports use recorded outcomes and guarded comparisons; correlation requires fourteen paired observations with variation and never claims causation.
 
-## Future sync and AI
+## Local sync and future AI
 
-Stable IDs, updated times, tombstones and a versioned batch interface prepare for future transport. They do not implement conflict resolution. Pairing must authenticate devices, establish keys and reject replay; clocks must not be trusted as the sole conflict oracle. Preserve concurrent note edits. Keep phone telemetry associated with the source device so Windows cannot interpret its own schedule as phone status.
+Manual pairing exchanges a random 256-bit key through a temporary code; TCP messages are encrypted/authenticated with AES-GCM and directional associated data. Pairing expires after ten minutes. Size/connection limits, timeouts and request replay guards bound the listener. Sync merges timestamped records with a deterministic tie-break and retains previous note versions. Active sessions and restriction settings do not sync. Android usage and native state become dated Windows snapshots. Automatic incremental sync and device-clock reconciliation remain future work.
 
-An eventual AI adapter should receive sanitized aggregate summaries and propose mutations for confirmation. No AI provider, secret, telemetry SDK or network dependency is present in the runtime application.
+An eventual AI adapter should receive sanitized aggregate summaries and propose mutations for confirmation. No AI provider or telemetry SDK is present. Network use is limited to user-initiated encrypted LAN pairing and sync.

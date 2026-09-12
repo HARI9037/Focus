@@ -13,12 +13,12 @@ jobs:
           java-version: '17'
       - uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.35.7'
+          flutter-version: '3.41.4'
           cache: true
       - run: python3 tools/check_native.py
       - run: python3 tools/check_source.py
       - run: python3 tools/bootstrap.py
-      - run: flutter analyze --no-fatal-infos
+      - run: flutter analyze
       - run: flutter test
       - run: flutter build apk --debug
       - uses: actions/upload-artifact@v4
@@ -31,11 +31,12 @@ jobs:
       - uses: actions/checkout@v4
       - uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.35.7'
+          flutter-version: '3.41.4'
           cache: true
       - run: python tools/bootstrap.py
-      - run: flutter analyze --no-fatal-infos
+      - run: flutter analyze
       - run: flutter test
+      - run: flutter test integration_test/app_test.dart -d windows
       - run: flutter build windows --release
       - uses: actions/upload-artifact@v4
         with:

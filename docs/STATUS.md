@@ -1,35 +1,20 @@
-# Scope and phase status
+# Implementation and acceptance status
 
-Status describes source implementation, not runtime acceptance. No phase is signed off for production until Flutter, Android and Windows verification gates pass.
+Updated 2026-09-09. This is a development build, not acceptance of the entire twelve-phase brief.
 
-| Phase from brief | Present | Still required |
+| Area | Implemented | Remaining |
 | --- | --- | --- |
-| 0 Foundation | Flutter application, runner bootstrap, themes, SQLite v1, repository, privacy-safe log codes, settings and tests | First compiler run, dependency lock, migration fixtures for future versions, full secure-storage integration |
-| 1 Productivity core | Today, Inbox, tasks, basic projects, notes, capture, agenda | Milestones, actual task-duration rollups in task UI, task-note links, background reminders, advanced recurrence |
-| 2 Focus engine | Persisted session lifecycle, presets, custom/open-ended timer, history, task association | Pomodoro breaks, blocking integration, OS completion notifications, observed interruptions |
-| 3 Night Lock | Native deterministic policy, alarms, warning categories, event-driven overlay, package whitelist, overrides, recovery and optional permission disclosure | Physical-device testing, OEM battery behavior, accessible alternative to timed hold, continuous observation/audit, schedule application confirmation UX |
-| 4 Device usage | On-demand event aggregation and daily app totals | Categories, launch counts, longest sessions, historical quality markers, enforced budgets and cooldowns |
-| 5 Analytics | Focus aggregation, daily app totals, 1/7/30-day selection, basic bars, explained scores | Persisted computed summaries, rich reports, comparisons, heatmaps, complete coverage accounting |
-| 6 Insights | Pure noncausal usage-change rule with tests | UI pipeline, comparable-period guards, correlations, sample-size thresholds, persisted insight generation |
-| 7 Goals and habits | Manual goals, check-ins, streaks | Metric links and automatic progress, completion-rate denominators |
-| 8 Windows | Responsive sidebar, search and Ctrl+N capture; official runner generation | Windows executable verification, phone dashboard after sync, system shortcuts, installer |
-| 9 Sync | Provider interface and record envelopes only | Pairing/authentication, transport, conflicts, encryption, per-device clocks/cursors, real end-to-end sync |
-| 10 Hardening | Initial checks and explicit device acceptance plan | Security, permission, accessibility, battery, lifecycle, migration and performance gates |
-| 11 Intelligence | Core works without AI; architecture permits a later adapter | Sanitized context contract, providers, proposals/approval and tool execution |
+| Foundation | Flutter 3.41.4, dependency lock, Android/Windows runners, SQLite v2 migration | Database encryption, broader performance validation |
+| Productivity | Tasks, projects, milestones, notes, task-note links, reminders, search, agenda, recurrence | Advanced recurrence and calendar interactions |
+| Focus | Presets/custom/open-ended sessions, breaks, recovery, task duration, Android blocking and completion alarms | Observed interruptions; Windows notifications while closed |
+| Night Lock | Schedule, opt-in overlay, warnings, essential apps, emergency escape, overrides, accessible timed alternative, observation gaps | Physical-phone overnight, OEM, reboot, doze, time-change and permission acceptance |
+| Digital discipline | Shared app/category budgets, 80% warnings, 100% restriction, focus blocking, cooldowns | Real-device usage accuracy, launch counts, longest sessions |
+| Analytics | Reports, task/habit outcomes, focus/app totals, guarded comparisons and noncausal correlation | Long-term validation, heatmaps, report snapshots |
+| Goals/habits | Manual or metric-linked goals, project progress, check-ins, streaks | Advanced schedules and hierarchies |
+| Windows | Compiled app, responsive navigation, Ctrl+N/Ctrl+K, native SQLite runtime test | Installer, clean-PC acceptance, closed-app reminders |
+| Sync | Manual encrypted LAN pairing, expiring random key, authenticated messages, replay guards, merge, note history, Android snapshot on Windows | Physical two-device acceptance, automatic incremental sync, device clock reconciliation |
+| Recovery | JSON records/usage/theme/targets/note history, CSV, transactional validation | Restriction configuration restore, app-wide deletion UI, encryption at rest |
+| Optional AI | Core works offline without AI | Providers and proposal/approval tools remain future scope |
 
-## Recommended next sequence
+Windows phone status is a dated snapshot. Night compliance counts only fully observed nights; observation gaps remain unknown. Session duration is not proof of attention. Android restrictions stay local to the phone. See VALIDATION.md for actual test evidence.
 
-1. Get a clean Flutter analysis/test run and debug APK on the target phone. Validate every existing CRUD and session workflow before adding features.
-2. Verify immediate emergency access, end-of-night removal, permission revocation, reboot, time changes and force-stop recovery. Fix these before adding daytime blocking.
-3. Add native observation sessions with explicit unknown intervals. Derive Night Lock compliance only from observed evidence.
-4. Stabilize the usage importer, then add explicit package categories and a single per-app daily budget end to end.
-5. Implement reports and period coverage, then secure sync after local behavior is stable.
-
-## Product decisions
-
-- Safety settings are reachable. This is intentional voluntary discipline, not device-owner kiosk mode.
-- Goals are explicitly manual in this version. No inferred progress is fabricated.
-- “Screen time” is labelled as app foreground estimates, not a precise physical-display metric.
-- Focus time measures session elapsed time. Closing the UI does not prove continued attention.
-- No sample usage, tasks, streaks or phone connection is populated by default.
-- Source architecture groups lightweight feature data in a common record envelope. It is not a finished strongly typed repository for every future entity.

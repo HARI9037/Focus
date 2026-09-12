@@ -1,23 +1,25 @@
 # Validation evidence
 
-Recorded during source creation on 2026-09-08.
+Updated 2026-09-09 on the user's Windows workspace.
 
-| Check | Actual result |
+| Check | Observed result |
 | --- | --- |
-| Java scheduling/usage source compilation | Passed using installed Java 17 compiler module |
-| Native policy test program | Passed: 51,875 assertions, mostly exhaustive minute-of-day membership/next-boundary invariants plus targeted cases |
-| Targeted native cases | Overnight/same-day boundaries, warning boundaries, timezone, spring/fall DST, repeated-hour end, override expiry, invalid schedules, foreground switching, duplicate resume, stale pause, screen-off, range clipping |
-| Actual SQLite schema execution | Passed: 8 schema/index statements, integrity check, negative-usage and duplicate-day constraints |
-| Android XML | Four files parsed successfully; declarations checked for minimal selected permissions |
-| Flutter/Dart tests | Authored, **not run**; no Flutter/Dart SDK available |
-| Flutter static analysis | **Not run**; compiler/analyzer unavailable |
-| Kotlin/Android compilation | **Not run**; Android SDK/Kotlin toolchain unavailable |
-| APK | **Not built** |
-| Windows executable | **Not built** |
-| UI screenshots/visual inspection | **Not performed**; no rendered-app image is presented |
-| Android lifecycle/OEM/battery tests | **Not performed** |
-| GitHub Actions | Workflow authored, **not triggered** |
+| Flutter static analysis | Passed, no issues |
+| Flutter unit, database, socket and widget tests | 42 passed |
+| Phone-sized capture | All eight record types pass at 360 logical pixels; milestone list/project/search regression passes |
+| Native Java policy/usage | 51,875 assertions passed |
+| Native discipline policy | Budget/group/warning/focus/cooldown/permission/boundary checks passed |
+| SQLite schema and Android declarations | 9 SQL statements, integrity/constraints and 4 XML files passed |
+| Windows runtime | Compiled and launched; task capture and SQLite close/reopen persistence passed |
+| Android API 36.1 emulator runtime | Compiled, installed and launched; native status/app enumeration, task capture and SQLite reopen passed using Flutter driver |
+| Release packaging | Final signed Android and Windows builds in progress; see build output before treating a package as final |
+| Physical Android phone | Not connected in ADB; device acceptance pending |
+| Overnight restrictions/OEM lifecycle | Not yet accepted on physical hardware |
+| Physical Android-to-Windows sync | Not yet accepted; authenticated local socket tests pass |
+| GitHub Actions | Local workflow corrected; no successful remote run of these changes claimed |
 
-The large assertion count is primarily a finite sweep of schedule minutes, not tens of thousands of independent real-device scenarios. These results validate only the pure policies and the shipped schema/declarations. They do not establish successful app compilation or production reliability.
+Evidence logs in the local workspace: analysis-results.log, test-results.log, runtime-windows.log, runtime-android-drive.log. Build logs are separate. Logs are ignored by Git. The Android test harness initially failed because the emulator was stopped or booting; a subsequent run with the correct Flutter driver harness passed.
 
-Reproduce available checks with `python tools/check_native.py` and `python tools/check_source.py`. On a configured Flutter machine, bootstrap runners, then run the analyzer/tests/builds before manual device acceptance.
+The large Java assertion count is primarily a finite sweep of schedule minutes, not thousands of real-device scenarios. Neither emulator success nor compilation establishes reliable overnight enforcement on a particular phone. Complete DEVICE_TESTS.md on the target phone before relying on Night Lock.
+
+Toolchain used: Flutter 3.41.4 / Dart 3.11.1, Java 17, Android SDK 36, Visual Studio 2022 Build Tools with C++ workload. Application behavior remains local-first. The encrypted sync tests cover authenticated transport and rejection behavior, not physical network/firewall acceptance.

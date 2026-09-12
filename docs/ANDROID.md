@@ -14,7 +14,7 @@ Minimum configured Android SDK: 26 (Android 8). Target/compile SDK are inherited
 | Emergency communication | Immediate override and ACTION_DIAL | No automatic call, no CALL_PHONE permission; safety settings fallback |
 | Exports | ACTION_CREATE_DOCUMENT through native channel | User chooses destination; cancellation/error returned to UI |
 
-Only Usage Access, optional notification/exact alarm access and the explicitly enabled accessibility service are used. No Notification Listener, Device Owner, overlay special permission, foreground service, battery exemption, contacts permission, Internet permission or root operation is requested by the main application manifest. Flutter-generated debug runners add Internet permission for development VM-service tooling; no telemetry implementation is included.
+Usage Access, optional notification/exact alarm access and the explicitly enabled accessibility service support restrictions. INTERNET permission supports authenticated, encrypted local-network device sync. No Notification Listener, Device Owner, overlay special permission, foreground service, battery exemption, contacts permission or root operation is requested. No telemetry implementation is included.
 
 The accessibility service declares `isAccessibilityTool=false`, `canRetrieveWindowContent=false` and `canPerformGestures=false`. The in-app disclosure explains what is observed, why, how it is processed locally and how to revoke access. It does not inspect UI text, passwords or screenshots. Personal-use distribution and store distribution still need the appropriate platform/policy review.
 

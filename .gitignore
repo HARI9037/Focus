@@ -9,3 +9,11 @@ android/key.properties
 *.db
 *.db-*
 .env*
+*.log
+dist/
+android/.gradle/
+android/.kotlin/
+android/captures/
+windows/flutter/ephemeral/
+*.iml
+.idea/

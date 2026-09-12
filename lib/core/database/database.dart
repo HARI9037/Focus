@@ -1,11 +1,10 @@
 import 'dart:io';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
-import 'package:sqflite/sqflite.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 class FocusDatabase {
-  static const version = 1;
+  static const version = 2;
   static const schema = <String>[
     """CREATE TABLE records (
       id TEXT PRIMARY KEY, kind TEXT NOT NULL, title TEXT NOT NULL,
@@ -24,28 +23,44 @@ class FocusDatabase {
       collected_at TEXT NOT NULL, quality TEXT NOT NULL,
       PRIMARY KEY(day,package))""",
     'CREATE INDEX usage_day ON usage_daily(day)',
+    'CREATE TABLE record_versions (record_id TEXT NOT NULL, updated_at TEXT NOT NULL, payload TEXT NOT NULL, PRIMARY KEY(record_id,updated_at))',
   ];
-  static Future<Database> open({DatabaseFactory? factory, String? location}) async {
+  static Future<Database> open({
+    DatabaseFactory? factory,
+    String? location,
+  }) async {
     if (factory == null && Platform.isWindows) {
       sqfliteFfiInit();
       factory = databaseFactoryFfi;
     }
     factory ??= databaseFactory;
-    final file = location ?? path.join((await getApplicationSupportDirectory()).path, 'focus.db');
-    return factory.openDatabase(file, options: OpenDatabaseOptions(
-      version: version,
-      onConfigure: (db) async {
-        await db.execute('PRAGMA foreign_keys=ON');
-        await db.rawQuery('PRAGMA journal_mode=WAL');
-      },
-      onCreate: (db, _) async { for (final sql in schema) { await db.execute(sql); } },
-      onUpgrade: (db, oldVersion, newVersion) async {
-        // Each future version must add a forward-only transactional migration.
-        throw StateError('No migration from $oldVersion to $newVersion');
-      },
-      onDowngrade: (db, oldVersion, newVersion) async {
-        throw StateError('This data needs a newer version of Focus.');
-      },
-    ));
+    final file =
+        location ??
+        path.join((await getApplicationSupportDirectory()).path, 'focus.db');
+    return factory.openDatabase(
+      file,
+      options: OpenDatabaseOptions(
+        version: version,
+        onConfigure: (db) async {
+          await db.execute('PRAGMA foreign_keys=ON');
+          await db.rawQuery('PRAGMA journal_mode=WAL');
+        },
+        onCreate: (db, _) async {
+          for (final sql in schema) {
+            await db.execute(sql);
+          }
+        },
+        onUpgrade: (db, oldVersion, newVersion) async {
+          if (oldVersion == 1 && newVersion == 2) {
+            await db.execute(schema.last);
+            return;
+          }
+          throw StateError('No migration from $oldVersion to $newVersion');
+        },
+        onDowngrade: (db, oldVersion, newVersion) async {
+          throw StateError('This data needs a newer version of Focus.');
+        },
+      ),
+    );
   }
 }
